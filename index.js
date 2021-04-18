@@ -26,7 +26,9 @@ const client = new MongoClient(uri, {
 client.connect((err) => {
     console.log(err);
     const employeeCollection = client.db("motofix").collection("employee");
-    const appointmentCollection = client.db("motofix").collection("appointments");
+    const appointmentCollection = client
+        .db("motofix")
+        .collection("appointments");
     const serviceCollection = client.db("motofix").collection("services");
 
     app.post("/addAppointment", (req, res) => {
@@ -51,7 +53,6 @@ client.connect((err) => {
                 filter.email = email;
             }
             appointmentCollection.find(filter).toArray((err, documents) => {
-                console.log(email, date.date, doctors, documents);
                 res.send(documents);
             });
         });
@@ -61,9 +62,9 @@ client.connect((err) => {
         const file = req.files?.file;
         const name = req.body.name;
         const email = req.body.email;
+        const phone = req.body.phone;
         const newImg = file?.data;
         const encImg = newImg?.toString("base64");
-        console.log(name, email, file);
 
         var image = {
             contentType: file.mimetype,
@@ -71,9 +72,11 @@ client.connect((err) => {
             img: Buffer.from(encImg, "base64"),
         };
 
-        employeeCollection.insertOne({ name, email, phone, image }).then((result) => {
-            res.send(result.insertedCount > 0);
-        });
+        employeeCollection
+            .insertOne({ name, email, phone, image })
+            .then((result) => {
+                res.send(result.insertedCount > 0);
+            });
     });
     //Find Employee
     app.get("/employee", (req, res) => {
@@ -90,7 +93,6 @@ client.connect((err) => {
         const serviceInfo = req.body.serviceInfo;
         const newImg = file?.data;
         const encImg = newImg?.toString("base64");
-        console.log(serviceName, serviceCharge, file);
 
         var image = {
             contentType: file.mimetype,
@@ -98,9 +100,11 @@ client.connect((err) => {
             img: Buffer.from(encImg, "base64"),
         };
 
-        serviceCollection.insertOne({ serviceName, serviceCharge, serviceInfo,  image }).then((result) => {
-            res.send(result.insertedCount > 0);
-        });
+        serviceCollection
+            .insertOne({ serviceName, serviceCharge, serviceInfo, image })
+            .then((result) => {
+                res.send(result.insertedCount > 0);
+            });
     });
 
     //Find Services
@@ -127,7 +131,7 @@ client.connect((err) => {
             });
     });
 
-    app.post("/isDoctor", (req, res) => {
+    app.post("/isAdmin", (req, res) => {
         const email = req.body.email;
         employeeCollection.find({ email: email }).toArray((err, doctors) => {
             res.send(doctors.length > 0);
